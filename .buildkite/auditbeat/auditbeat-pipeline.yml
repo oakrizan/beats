@@ -23,7 +23,7 @@ env:
   ASDF_MAGE_VERSION: 1.15.0
 
 steps:
-  - group: "Auditbeat Mandatory Testing  "
+  - group: "Auditbeat Mandatory Testing"
     key: "auditbeat-mandatory-tests"
 
     steps:
@@ -121,11 +121,12 @@ steps:
 
   - group: "Auditbeat Extended Tests"
     key: "auditbeat-extended-tests"
-    if: build.env("BUILDKITE_PULL_REQUEST") == "false"
+    if: build.env("BUILDKITE_PULL_REQUEST") == "false" ||  build.env("GITHUB_PR_LABELS") =~ /.*(macOS|arm|integrations).*/
 
     steps:
       - label: ":linux: Auditbeat Ubuntu Integration Tests"
         key: "auditbeat-extended-integ-tests"
+        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*integrations.*/
         command: |
           cd auditbeat
           mage build integTest
@@ -145,7 +146,7 @@ steps:
 
       - label: ":linux: Auditbeat Linux ARM Integration Tests"
         key: "auditbeat-extended-arm64-integ-tests"
-        if: build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
+        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*integrations.*/
         command: |
           set -euo pipefail
           cd auditbeat
@@ -163,11 +164,9 @@ steps:
 
       - label: ":linux: Auditbeat Linux ARM Unit Tests"
         key: "auditbeat-extended-arm64-unit-tests"
-        if: build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
+        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
         command: |
-          set -euo pipefail
           cd auditbeat
-          mage build unitTest
           mage build unitTest
         retry:
           automatic:
@@ -184,7 +183,7 @@ steps:
               context: "auditbeat: Linux arm64 Unit Tests"
 
       - label: ":mac: Auditbeat macOS x86_64 Unit Tests"
-        if: build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
+        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
         command: |
           set -euo pipefail
           source .buildkite/scripts/install_macos_tools.sh
@@ -204,13 +203,13 @@ steps:
               context: "auditbeat: macOS x86_64 Unit Tests"
 
       - label: ":mac: Auditbeat macOS arm64 Unit Tests"
-        if: build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
+        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
         command: |
           set -euo pipefail
           source .buildkite/scripts/install_macos_tools.sh
           cd auditbeat
           mage build unitTest
-        etry:
+        retry:
           automatic:
             - limit: 3
         agents:
