@@ -23,13 +23,12 @@ env:
   ASDF_MAGE_VERSION: 1.15.0
 
 steps:
-  - group: "Auditbeat Mandatory Testing"
+  - group: "Auditbeat Mandatory Testing  "
     key: "auditbeat-mandatory-tests"
 
     steps:
       - label: ":ubuntu: Auditbeat Unit Tests"
         command: |
-          set -euo pipefail
           cd auditbeat
           mage build unitTest
         retry:
@@ -48,7 +47,6 @@ steps:
 
       - label: ":rhel: Auditbeat Unit Tests"
         command: |
-          set -euo pipefail
           cd auditbeat
           mage build unitTest
         retry:
@@ -83,7 +81,7 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Windows 2016 Unit Tests"
+              context: "auditbeat: Win-2016 Unit Tests"
 
       - label: ":windows: Auditbeat Win-2022 Unit Tests"
         command: |
@@ -103,7 +101,7 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Windows 2022 Unit Tests"
+              context: "auditbeat: Win-2022 Unit Tests"
 
       - label: ":linux: Auditbeat Crosscompile"
         command: |
@@ -123,19 +121,17 @@ steps:
 
   - group: "Auditbeat Extended Tests"
     key: "auditbeat-extended-tests"
-    if: build.env("BUILDKITE_PULL_REQUEST") == "false" ||  build.env("GITHUB_PR_LABELS") =~ /.*(macOS|arm|integrations).*/
+    if: build.env("BUILDKITE_PULL_REQUEST") == "false"
 
     steps:
       - label: ":linux: Auditbeat Ubuntu Integration Tests"
         key: "auditbeat-extended-integ-tests"
-        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*integrations.*/
         command: |
-          set -euo pipefail
           cd auditbeat
           mage build integTest
         retry:
           automatic:
-           - limit: 3
+            - limit: 3
         agents:
           provider: "gcp"
           image: "${IMAGE_UBUNTU_X86_64}"
@@ -147,16 +143,13 @@ steps:
           - github_commit_status:
               context: "auditbeat: Linux Integration Tests"
 
-      - label: ":linux: Auditbeat Ubuntu arm64 Integration Tests"
+      - label: ":linux: Auditbeat Linux ARM Integration Tests"
         key: "auditbeat-extended-arm64-integ-tests"
-        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*integrations.*/
+        if: build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
         command: |
           set -euo pipefail
           cd auditbeat
           mage build integTest
-        retry:
-          automatic:
-           - limit: 3
         agents:
           provider: "aws"
           imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
@@ -166,14 +159,15 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Linux arm64 Integration Tests"
+              context: "auditbeat: Linux ARM Integration Tests"
 
-      - label: ":linux: Auditbeat Ubuntu arm64 Unit Tests"
+      - label: ":linux: Auditbeat Linux ARM Unit Tests"
         key: "auditbeat-extended-arm64-unit-tests"
-        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
+        if: build.env("GITHUB_PR_LABELS") =~ /.*arm.*/
         command: |
           set -euo pipefail
           cd auditbeat
+          mage build unitTest
           mage build unitTest
         retry:
           automatic:
@@ -190,7 +184,7 @@ steps:
               context: "auditbeat: Linux arm64 Unit Tests"
 
       - label: ":mac: Auditbeat macOS x86_64 Unit Tests"
-        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
+        if: build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
         command: |
           set -euo pipefail
           source .buildkite/scripts/install_macos_tools.sh
@@ -209,16 +203,16 @@ steps:
           - github_commit_status:
               context: "auditbeat: macOS x86_64 Unit Tests"
 
-      - label: ":mac: Auditbeat macOS arm64 ARM Unit Tests"
-        if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
+      - label: ":mac: Auditbeat macOS arm64 Unit Tests"
+        if: build.env("GITHUB_PR_LABELS") =~ /.*macOS.*/
         command: |
           set -euo pipefail
           source .buildkite/scripts/install_macos_tools.sh
           cd auditbeat
           mage build unitTest
-        retry:
+        etry:
           automatic:
-           - limit: 3
+            - limit: 3
         agents:
           provider: "orka"
           imagePrefix: "${IMAGE_MACOS_ARM}"
@@ -253,7 +247,7 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Extended Windows 2019 Unit Tests"
+              context: "auditbeat: Extended Win-2019 Unit Tests"
 
       - label: ":windows: Auditbeat Win-10 Unit Tests"
         key: "auditbeat-extended-win-10-unit-tests"
@@ -274,9 +268,9 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Extended Windows 10 Unit Tests"
+              context: "auditbeat: Extended Win-10 Unit Tests"
 
-      - label: ":windows: Auditbeat Win-11 Unit Tests"
+      - label: ":windows: Auditbeat Win 11 Unit Tests"
         key: "auditbeat-extended-win-11-unit-tests"
         command: |
           Set-Location -Path auditbeat
@@ -295,7 +289,7 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Extended Windows 11 Unit Tests"
+              context: "auditbeat: Extended Win 11 Unit Tests"
 
   - wait: ~
     # with PRs, we want to run packaging only if mandatory tests succeed
@@ -313,7 +307,6 @@ steps:
           PLATFORMS: "+all linux/amd64 linux/arm64 windows/amd64 darwin/amd64 darwin/arm64"
           SNAPSHOT: true
         command: |
-          set -euo pipefail
           cd auditbeat
           mage package
         agents:
@@ -331,7 +324,6 @@ steps:
           PACKAGES: "docker"
           SNAPSHOT: true
         command: |
-          set -euo pipefail
           cd auditbeat
           mage package
         agents:
