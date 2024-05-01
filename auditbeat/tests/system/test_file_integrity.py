@@ -1,9 +1,12 @@
-import os
 import time
 import unittest
 import platform
 from auditbeat import *
+import platform
+import time
+import unittest
 
+from auditbeat import *
 
 if platform.platform().split('-')[0] == 'Linux':
     import pwd
@@ -77,6 +80,20 @@ def wrap_except(expr):
         return expr()
     except IOError:
         return False
+
+
+def is_ubuntu_x86_64():
+    if platform.system() == 'Ubuntu' in platform.platform():
+        if platform.machine() == "x86_64":
+            return True
+    return False
+
+
+def is_ubuntu_arm():
+    if platform.system() == 'Ubuntu' in platform.platform():
+        if platform.machine() == "aarch64":
+            return True
+    return False
 
 
 class Test(BaseTest):
@@ -193,11 +210,14 @@ class Test(BaseTest):
         self._test_non_recursive("fsnotify")
 
     @unittest.skipUnless(is_root(), "Requires root")
+    @unittest.skipIf(is_ubuntu_x86_64(), "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
+    @unittest.skipIf(is_ubuntu_arm(), "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
     def test_non_recursive__ebpf(self):
         self._test_non_recursive("ebpf")
 
     @unittest.skipUnless(is_platform_supported(), "Requires Linux 3.10.0+ and arm64/amd64 arch")
     @unittest.skipUnless(is_root(), "Requires root")
+    @unittest.skipIf(is_ubuntu_x86_64(), "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
     def test_non_recursive__kprobes(self):
         self._test_non_recursive("kprobes")
 
@@ -273,11 +293,14 @@ class Test(BaseTest):
         self._test_recursive("fsnotify")
 
     @unittest.skipUnless(is_root(), "Requires root")
+    @unittest.skipIf(is_ubuntu_x86_64(), "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
+    @unittest.skipIf(is_ubuntu_arm(), "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
     def test_recursive__ebpf(self):
         self._test_recursive("ebpf")
 
     @unittest.skipUnless(is_platform_supported(), "Requires Linux 3.10.0+ and arm64/amd64 arch")
     @unittest.skipUnless(is_root(), "Requires root")
+    @unittest.skipIf(is_ubuntu_x86_64, "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
     def test_recursive__kprobes(self):
         self._test_recursive("kprobes")
 
@@ -349,5 +372,6 @@ class Test(BaseTest):
 
     @unittest.skipUnless(is_platform_supported(), "Requires Linux 3.10.0+ and arm64/amd64 arch")
     @unittest.skipUnless(is_root(), "Requires root")
+    @unittest.skipIf(is_ubuntu_x86_64, "Timeout error on Buildkite - https://github.com/elastic/ingest-dev/issues/3270")
     def test_file_modified__kprobes(self):
         self._test_file_modified("kprobes")
