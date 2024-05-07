@@ -123,7 +123,7 @@ steps:
     if: build.env("BUILDKITE_PULL_REQUEST") == "false" ||  build.env("GITHUB_PR_LABELS") =~ /.*(macOS|arm|integrations).*/
 
     steps:
-      - label: ":ubuntu: auditbeat Ubuntu Integration Tests"
+      - label: ":ubuntu: auditbeat Linux x86_64 Integration Tests"
         key: "auditbeat-extended-integ-tests"
         if: build.env("BUILDKITE_PULL_REQUEST") == "false" || build.env("GITHUB_PR_LABELS") =~ /.*integrations.*/
         command: |
@@ -141,7 +141,7 @@ steps:
           - "auditbeat/build/*.json"
         notify:
           - github_commit_status:
-              context: "auditbeat: Linux Integration Tests"
+              context: "auditbeat: Linux x86_64 Integration Tests"
 
       - label: ":linux: auditbeat Linux arm64 Integration Tests"
         key: "auditbeat-extended-arm64-integ-tests"

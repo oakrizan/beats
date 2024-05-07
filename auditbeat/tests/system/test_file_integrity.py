@@ -2,11 +2,6 @@ import time
 import unittest
 import platform
 from auditbeat import *
-import platform
-import time
-import unittest
-
-from auditbeat import *
 
 if platform.platform().split('-')[0] == 'Linux':
     import pwd
